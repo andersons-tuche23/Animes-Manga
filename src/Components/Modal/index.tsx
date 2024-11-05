@@ -1,5 +1,3 @@
-// src/Components/Modal.tsx
-
 import React from "react";
 import { ModalOverlay, ModalContent, CloseButton } from "./styles";
 
@@ -21,7 +19,6 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, trailerUrl }) => {
           height="400"
           src={trailerUrl}
           title="Trailer"
-          // frameBorder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         ></iframe>

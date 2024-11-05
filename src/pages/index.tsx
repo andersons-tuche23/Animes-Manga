@@ -9,53 +9,10 @@ import {
   PaginationContainer,
   PaginationButton,
   PaginationInfo,
-} from "./styles"; 
+} from "./styles";
 import AnimeComponent from "../Components/Animes";
-import TrailerComponent from "../Components/AnimeTrailer";
-
-export interface Genre {
-  mal_id: number;
-  name: string;
-  type?: string;
-  url?: string;
-}
-
-export interface Anime {
-  title: string;
-  synopsis: string;
-  imageUrl: string;
-  episodes: string;
-  genres: Genre[];
-  trailerUrl: string | null;
-}
-
-interface ApiResponse {
-  data: {
-    title: string;
-    synopsis: string;
-    images: {
-      jpg: {
-        image_url: string;
-      };
-    };
-    episodes: number;
-    trailer: {
-      youtube_id: string;
-      url: string | null;
-      embed_url: string | null;
-    };
-    genres: {
-      mal_id: number;
-      name: string;
-      type?: string;
-      url?: string;
-    }[];
-  }[];
-  pagination: {
-    last_visible_page: number;
-    has_next_page: boolean;
-  };
-}
+import Modal from "../Components/Modal"; 
+import { Anime, ApiResponse } from "./types";
 
 const Home: React.FC = () => {
   const [animeData, setAnimeData] = useState<Anime[]>([]);
@@ -65,6 +22,7 @@ const Home: React.FC = () => {
   const [hasNextPage, setHasNextPage] = useState<boolean>(false);
   const limit = 10;
   const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const fetchAnimeData = async (name: string, page: number) => {
     setLoading(true);
@@ -82,12 +40,7 @@ const Home: React.FC = () => {
         synopsis: item.synopsis,
         imageUrl: item.images.jpg.image_url,
         episodes: item.episodes.toString(),
-        genres: item.genres.map((genre) => ({
-          mal_id: genre.mal_id,
-          name: genre.name,
-          type: genre.type,
-          url: genre.url,
-        })),
+        genres: item.genres,
         trailerUrl: item.trailer.embed_url,
       }));
 
@@ -101,25 +54,9 @@ const Home: React.FC = () => {
     }
   };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      setCurrentPage(1);
-      fetchAnimeData(animeName, 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    const nextPage = currentPage + 1;
-    setCurrentPage(nextPage);
-    fetchAnimeData(animeName, nextPage);
-  };
-
-  const handlePreviousPage = () => {
-    const prevPage = currentPage - 1;
-    if (prevPage > 0) {
-      setCurrentPage(prevPage);
-      fetchAnimeData(animeName, prevPage);
-    }
+  const handleAnimeSelect = (anime: Anime) => {
+    setSelectedAnime(anime);
+    setIsModalOpen(true); 
   };
 
   return (
@@ -129,29 +66,42 @@ const Home: React.FC = () => {
         placeholder="Pesquise pelo nome do anime"
         value={animeName}
         onChange={(e) => setAnimeName(e.target.value)}
-        onKeyDown={handleKeyDown}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            setCurrentPage(1);
+            fetchAnimeData(animeName, 1);
+          }
+        }}
       />
       {loading && <LoadingMessage>Carregando...</LoadingMessage>}
 
-      <AnimeComponent animeData={animeData} onAnimeSelect={setSelectedAnime} />
+      <AnimeComponent
+        animeData={animeData}
+        onAnimeSelect={handleAnimeSelect} 
+      />
 
       {animeData.length === 0 && !loading && (
         <NoResultsMessage>Nenhum anime encontrado.</NoResultsMessage>
       )}
 
-      <TrailerComponent
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)} 
         trailerUrl={selectedAnime ? selectedAnime.trailerUrl : null}
       />
 
       <PaginationContainer>
         <PaginationButton
-          onClick={handlePreviousPage}
+          onClick={() => setCurrentPage((page) => page - 1)}
           disabled={currentPage === 1}
         >
           Página Anterior
         </PaginationButton>
         <PaginationInfo>Página {currentPage}</PaginationInfo>
-        <PaginationButton onClick={handleNextPage} disabled={!hasNextPage}>
+        <PaginationButton
+          onClick={() => setCurrentPage((page) => page + 1)}
+          disabled={!hasNextPage}
+        >
           Próxima Página
         </PaginationButton>
       </PaginationContainer>
