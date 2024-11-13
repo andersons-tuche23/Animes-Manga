@@ -1,5 +1,4 @@
-// src/pages/Home.tsx
-
+/* eslint-disable @next/next/no-img-element */
 import React, { useState } from "react";
 import {
   Container,
@@ -11,7 +10,7 @@ import {
   PaginationInfo,
 } from "./styles";
 import AnimeComponent from "../Components/Animes";
-import Modal from "../Components/Modal"; 
+import Modal from "../Components/Modal";
 import { Anime, ApiResponse } from "./types";
 
 const Home: React.FC = () => {
@@ -23,9 +22,11 @@ const Home: React.FC = () => {
   const limit = 10;
   const [selectedAnime, setSelectedAnime] = useState<Anime | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isGifLoading, setIsGifLoading] = useState<boolean>(false);
 
   const fetchAnimeData = async (name: string, page: number) => {
     setLoading(true);
+    setSelectedAnime(null)
     try {
       const response = await fetch(
         `https://api.jikan.moe/v4/anime?q=${name}&page=${page}&limit=${limit}`
@@ -41,8 +42,8 @@ const Home: React.FC = () => {
         imageUrl: item.images.jpg.image_url,
         episodes: item.episodes.toString(),
         genres: item.genres,
-        trailerUrl: item.trailer.embed_url,
-      }));
+        trailerUrl: item.trailer ? item.trailer.embed_url : null,
+      })); 
 
       setAnimeData(formattedData);
       setHasNextPage(data.pagination.has_next_page);
@@ -51,12 +52,24 @@ const Home: React.FC = () => {
       setAnimeData([]);
     } finally {
       setLoading(false);
+      setTimeout(() => setIsGifLoading(false), 1000); 
     }
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(1);
+    setIsGifLoading(true); 
+    fetchAnimeData(animeName, 1);
   };
 
   const handleAnimeSelect = (anime: Anime) => {
     setSelectedAnime(anime);
-    setIsModalOpen(true); 
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedAnime(null)
   };
 
   return (
@@ -68,38 +81,52 @@ const Home: React.FC = () => {
         onChange={(e) => setAnimeName(e.target.value)}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
-            setCurrentPage(1);
-            fetchAnimeData(animeName, 1);
+            handleSearch();
           }
         }}
       />
+      {isGifLoading && (
+        <Modal isOpen={isGifLoading} onClose={() => setIsGifLoading(false)}>
+          <div style={{ textAlign: "center" }}>
+            <img src="/goku.gif" alt="Carregando..." />
+            <p>Carregando...</p>
+          </div>
+        </Modal>
+      )}
       {loading && <LoadingMessage>Carregando...</LoadingMessage>}
 
-      <AnimeComponent
-        animeData={animeData}
-        onAnimeSelect={handleAnimeSelect} 
-      />
+      <AnimeComponent animeData={animeData} onAnimeSelect={handleAnimeSelect} />
 
       {animeData.length === 0 && !loading && (
         <NoResultsMessage>Nenhum anime encontrado.</NoResultsMessage>
       )}
 
-      <Modal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)} 
-        trailerUrl={selectedAnime ? selectedAnime.trailerUrl : null}
-      />
+{isModalOpen && selectedAnime && (
+  <Modal
+    isOpen={isModalOpen}
+    onClose={handleModalClose}
+    trailerUrl={selectedAnime.trailerUrl}
+  />
+)}
 
       <PaginationContainer>
         <PaginationButton
-          onClick={() => setCurrentPage((page) => page - 1)}
+          onClick={() => {
+            const newPage = currentPage - 1;
+            setCurrentPage(newPage);
+            fetchAnimeData(animeName, newPage);
+          }}
           disabled={currentPage === 1}
         >
           Página Anterior
         </PaginationButton>
         <PaginationInfo>Página {currentPage}</PaginationInfo>
         <PaginationButton
-          onClick={() => setCurrentPage((page) => page + 1)}
+          onClick={() => {
+            const newPage = currentPage + 1;
+            setCurrentPage(newPage);
+            fetchAnimeData(animeName, newPage);
+          }}
           disabled={!hasNextPage}
         >
           Próxima Página

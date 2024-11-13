@@ -1,27 +1,37 @@
 import React from "react";
-import { ModalOverlay, ModalContent, CloseButton } from "./styles";
+import { ModalOverlay, ModalContent } from "./styles";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
-  trailerUrl: string | null;
+  trailerUrl?: string | null; 
+  children?: React.ReactNode; 
 }
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, trailerUrl }) => {
-  if (!isOpen || !trailerUrl) return null;
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, trailerUrl, children }) => {
+  if (!isOpen) return null;
+
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   return (
-    <ModalOverlay>
+    <ModalOverlay onClick={handleOverlayClick}>
       <ModalContent>
-        <CloseButton onClick={onClose}>×</CloseButton>
-        <iframe
-          width="100%"
-          height="400"
-          src={trailerUrl}
-          title="Trailer"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        ></iframe>
+        {children ? (
+          children
+        ) : trailerUrl ? (
+          <iframe
+            width="100%"
+            height="400"
+            src={trailerUrl}
+            title="Trailer"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
+        ) : null}
       </ModalContent>
     </ModalOverlay>
   );

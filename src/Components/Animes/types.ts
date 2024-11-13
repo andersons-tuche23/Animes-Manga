@@ -1,11 +1,9 @@
-// src/types.ts
 export interface Genre {
     mal_id: number;
     name: string;
     type?: string;
     url?: string;
   }
-  
   export interface Anime {
     title: string;
     synopsis: string;
@@ -14,8 +12,6 @@ export interface Genre {
     genres: Genre[];
     trailerUrl: string | null;
   }
-  
-  // Interface ApiResponse se já foi definida anteriormente
   export interface ApiResponse {
     data: {
       title: string;

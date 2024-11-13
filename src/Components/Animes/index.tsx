@@ -5,7 +5,7 @@ import {
   AnimeCard,
   Title,
   AnimeImage,
-  Synopsis,
+  // Synopsis,
   Episodes,
   Genres,
 } from "./styles";
@@ -29,9 +29,9 @@ const AnimeComponent: React.FC<AnimeComponentProps> = ({
           <AnimeCard key={index} onClick={() => onAnimeSelect(anime)}>
             <Title>{anime.title}</Title>
             <AnimeImage src={anime.imageUrl} alt={anime.title} />
-            <Synopsis>
+            {/* <Synopsis>
               <strong>Sinopse:</strong> {anime.synopsis}
-            </Synopsis>
+            </Synopsis> */}
             <Episodes>
               <strong>Número de episódios:</strong> {anime.episodes}
             </Episodes>

@@ -1,4 +1,3 @@
-// styles.ts
 import styled from 'styled-components';
 
 export const Container = styled.div`
@@ -6,7 +5,7 @@ export const Container = styled.div`
     flex-wrap: wrap; 
     justify-content: center; 
     padding: 20px;
-    background-color: #eaeaea; 
+    /* background-color: #eaeaea;  */
     min-height: 100vh; 
 `;
 

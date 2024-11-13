@@ -1,5 +1,3 @@
-// src/Components/ModalStyles.ts
-
 import styled from "styled-components";
 
 export const ModalOverlay = styled.div`
@@ -21,14 +19,4 @@ export const ModalContent = styled.div`
   max-width: 800px;
   width: 100%;
   position: relative;
-`;
-
-export const CloseButton = styled.button`
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
 `;
